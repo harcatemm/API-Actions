@@ -3,6 +3,7 @@ name: CI => create a PR (Tests -> PR -> enable auto-merge)
 on:
   push:
     branches:
+      - 'main'
       - 'feature/**'
 
 permissions:
@@ -84,3 +85,4 @@ jobs:
 
 
     
+
