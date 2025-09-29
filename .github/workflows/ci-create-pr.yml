@@ -5,6 +5,9 @@ on:
     branches:
       - 'main'
       - 'feature/**'
+  pull_request:
+    branches:
+      - 'main'
 
 permissions:
   contents: read
@@ -14,7 +17,7 @@ permissions:
 jobs: 
   build-and-test:
     name: build-and-test
-    runs-on: ubunto-latest
+    runs-on: ubuntu-latest   # corregido el typo
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,7 +61,8 @@ jobs:
             });
             if (prs.length > 0) {
               console.log(`PR already exists: ${prs[0].html_url}`);
-              return prs[0].number;
+              core.setOutput('pr_number', prs[0].number);
+              return;
             }
             // crear PR
             const pr = await github.rest.pulls.create({
@@ -70,19 +74,13 @@ jobs:
               body: `PR auto-creado por CI: las pruebas pasaron. Por favor revisar y aprobar.`,
             });
             console.log(`Created PR: ${pr.data.html_url}`);
-            return pr.data.number;
+            core.setOutput('pr_number', pr.data.number);
 
       - name: Enable auto-merge for the PR
-        if: ${{ steps.create_pr.outputs.result != '' }}
+        if: ${{ steps.create_pr.outputs.pr_number != '' }}
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          pull-request-number: ${{ steps.create_pr.outputs.result }}
+          pull-request-number: ${{ steps.create_pr.outputs.pr_number }}
           merge-method: squash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      
-
-
-    
-
