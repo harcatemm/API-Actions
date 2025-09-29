@@ -243,5 +243,40 @@ namespace UnitTests.Controllers
 
 
         }
+
+        [Fact]
+        public async Task GetProductByIdWithCategory_ShouldReturnProduct()
+        {
+            //Arrange 
+            var productId = 1;
+            var product = new ProductWithCategoryDTO
+            {
+                Id = productId,
+                Name = "Iphone 17",
+                Description = "Newly iphone with IA",
+                Price = 1000,
+                Category = new CategoryDTO
+                {
+                    Id = 1,
+                    Name = "Tech",
+                    Description = "All about tech"
+                }
+            };
+
+            _mockProductService.Setup(s => s.GetProductByIdWithCategoryDTO(productId))
+                .ReturnsAsync(product);
+
+            //Act 
+            var result = await _controller.GetProductByIdWithCategory(productId);
+
+            //Assert
+            var resultOk = result.Result.Should().BeOfType<OkObjectResult>().Which;
+            var response = resultOk.Value.Should().BeOfType<ApiResponse<ProductWithCategoryDTO>>().Which;
+
+            response.Success.Should().BeTrue();
+            response.Data.Should().NotBeNull();
+            var productResult = response.Data.Should().BeOfType<ProductWithCategoryDTO>().Which;
+            productResult.Id.Should().Be(productId);    
+        }
     }
 }

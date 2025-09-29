@@ -21,7 +21,7 @@ namespace Catalog.Controllers
         /// Get all products
         /// </summary>
         /// <returns></returns>
-        [HttpGet("products", Name = "GetAllProducts")]
+        [HttpGet("", Name = "GetAllProducts")]
         public async Task<ActionResult<ApiResponse<IEnumerable<ProductDTO?>>>> Get()
         {
             var products = await productService.GetAllProductsAsync();
@@ -46,7 +46,7 @@ namespace Catalog.Controllers
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        [HttpPost("AddProduct", Name = "AddProduct")]
+        [HttpPost("", Name = "AddProduct")]
         public async Task<ActionResult<ApiResponse<bool>>> Add([FromBody] ProductDTO? product)
         {
             if (product is null)
@@ -79,7 +79,7 @@ namespace Catalog.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("product/{id}", Name = "DeleteProductById")]
+        [HttpDelete("{id:int}", Name = "DeleteProductById")]
         public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
         {
             if (id <= 0)
@@ -113,7 +113,7 @@ namespace Catalog.Controllers
         /// <param name="id"></param>
         /// <param name="product"></param>
         /// <returns></returns>
-        [HttpPut("product/{id}", Name = "UpdateProductById")]
+        [HttpPut("{id:int}", Name = "UpdateProductById")]
         public async Task<ActionResult<ApiResponse<bool>>> Update(int id, [FromBody] ProductDTO product)
         {
             if (product is null || id != product.Id)
@@ -146,7 +146,7 @@ namespace Catalog.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("product/{id}", Name = "GetProductById")]
+        [HttpGet("{id:int}", Name = "GetProductById")]
         public async Task<ActionResult<ApiResponse<ProductDTO?>>> GetProductById(int id)
         {
             if(id <= 0)
@@ -173,6 +173,39 @@ namespace Catalog.Controllers
                     Data = null
                 });
 
+        }
+
+        /// <summary>
+        /// Get a product by id with category
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("GetProductByIdWithCategory/{id:int}", Name = "GetProductByIdWithCategory")]
+        public async Task<ActionResult<ApiResponse<ProductWithCategoryDTO>>> GetProductByIdWithCategory(int id)
+        {
+            if (id <= 0)
+                return BadRequest(new ApiResponse<ProductWithCategoryDTO?>
+                {
+                    Success = false,
+                    Message = "Invalid product id",
+                    Data = null
+                });
+
+            var product = await productService.GetProductByIdWithCategoryDTO(id);
+            if (product is not null)
+                return Ok(new ApiResponse<ProductWithCategoryDTO?>
+                {
+                    Success = true,
+                    Message = "Product found",
+                    Data = product
+                });
+            else
+                return NotFound(new ApiResponse<ProductWithCategoryDTO?>
+                {
+                    Success = false,
+                    Message = "Id product not found",
+                    Data = null
+                });
         }
     }
 }
