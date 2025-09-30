@@ -21,13 +21,18 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();   
+    using var scope = app.Services.CreateScope();
     var provider = scope.ServiceProvider;
     var db = provider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-    
-    await IdentitySeed.SeedAsync(provider);
-    await DataSeed.SeedAsync(db);
+
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+        await IdentitySeed.SeedAsync(provider);
+        await DataSeed.SeedAsync(db);
+    }
+    else
+        db.Database.EnsureCreated();    
 }
 
 
@@ -55,3 +60,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+public partial class Program { }
