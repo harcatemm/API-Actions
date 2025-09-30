@@ -39,7 +39,7 @@ jobs:
         run: dotnet test ./Solution.sln --configuration Release --verbosity normal
 
   create-pr:
-    name: create-pr-if-tests-pass-ok
+    name: create-pr-if-tests-pass
     runs-on: ubuntu-latest
     needs: build-and-test
 
@@ -48,17 +48,17 @@ jobs:
         id: create_pr
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}   # <-- usa el PAT aquí
+          github-token: ${{ secrets.PAT_TOKEN }}   # <- usamos el PAT guardado
           script: |
             const branch = process.env.GITHUB_REF.replace('refs/heads/','');
             const base = 'main';
-            // buscar PR abierta
+            // buscar PR abierta desde esta rama hacia main
             const { data: prs } = await github.rest.pulls.list({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            head: `${context.repo.owner}:${branch}`,
-            base,
-            state: 'open'
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              base,
+              state: 'open'
             });
             if (prs.length > 0) {
               console.log(`PR already exists: ${prs[0].html_url}`);
@@ -76,11 +76,4 @@ jobs:
             console.log(`Created PR: ${pr.data.html_url}`);
             return pr.data.number;
 
-      - name: Enable auto-merge for the PR
-        if: ${{ steps.create_pr.outputs.result != '' }}
-        uses: peter-evans/enable-pull-request-automerge@v2
-        with:
-          pull-request-number: ${{ steps.create_pr.outputs.result }}
-          merge-method: squash
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}   # <-- también pasamos el PAT aquí
+
