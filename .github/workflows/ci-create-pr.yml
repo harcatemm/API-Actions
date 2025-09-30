@@ -35,8 +35,12 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+      - name: Test UnitTests
+        run: dotnet test ./API-Actions/UnitTests/UnitTests.csproj --configuration Release --verbosity normal
+
+      - name: Test IntegrationTests
+        run: dotnet test ./API-Actions/IntegrationTests/IntegrationTests.csproj --configuration Release --verbosity normal
+
 
   create-pr:
     name: create-pr-if-tests-pass-ok
@@ -84,3 +88,4 @@ jobs:
           merge-method: squash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
