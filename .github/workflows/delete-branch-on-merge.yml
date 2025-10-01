@@ -1,0 +1,58 @@
+name: Delete head branch after PR merge
+
+# Se dispara cuando un PR se cierra (merge o cerrado)
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  delete-branch:
+    # Solo correr si el PR fue mergeado y la rama head != base
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.head.ref != github.event.pull_request.base.ref }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log PR info
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} closed. merged=${{ github.event.pull_request.merged }}"
+          echo "head branch: ${{ github.event.pull_request.head.ref }}"
+          echo "base branch: ${{ github.event.pull_request.base.ref }}"
+
+      - name: Delete head branch (only feature/*)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            const branch = context.payload.pull_request.head?.ref;
+            const base = context.payload.pull_request.base?.ref;
+            if (!branch) {
+              console.log('No head branch found — nothing to delete.');
+              return;
+            }
+            // Opcional: sólo borrar ramas que empiecen con feature/
+            if (!branch.startsWith('feature/')) {
+              console.log(`Branch "${branch}" does not match "feature/*" rule — skipping deletion.`);
+              return;
+            }
+            if (branch === base) {
+              console.log(`Head branch equals base branch (${branch}) — skipping deletion.`);
+              return;
+            }
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branch}`
+              });
+              console.log(`Deleted branch: ${branch}`);
+            } catch (err) {
+              if (err.status === 422 || err.status === 404) {
+                console.log(`Branch ${branch} does not exist or was already deleted.`);
+              } else {
+                throw err;
+              }
+            }
