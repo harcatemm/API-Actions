@@ -35,5 +35,24 @@ namespace IntegrationTests.Controllers
             var data = response?.Data.Should().BeAssignableTo<IEnumerable<ProductDTO?>>().Which;
             data.Should().HaveCount(4);            
         }
+
+        [Fact]
+        public async Task GetProductById_ShouldReturnProduct_WhenIdProductExist()
+        {
+            //Arrange
+            var productId = 1;
+
+            //Act
+            var result = await _httpClient.GetAsync($"api/v1/Product/{productId}");
+
+            //Assert
+            result.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var response = await result.Content.ReadFromJsonAsync<ApiResponse<ProductDTO?>>();
+            response?.Success.Should().BeTrue();
+            response?.Data.Should().NotBeNull();
+            var data = response?.Data.Should().BeAssignableTo<ProductDTO?>().Which;
+            data?.Id.Should().Be(productId);
+        }
     }
 }
