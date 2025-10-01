@@ -6,6 +6,9 @@ using Asp.Versioning;
 
 namespace Catalog.Controllers
 {
+    /// <summary>
+    /// Product Endpoints
+    /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
