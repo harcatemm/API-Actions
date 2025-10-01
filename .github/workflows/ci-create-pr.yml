@@ -3,7 +3,6 @@ name: CI => create a PR (Tests -> PR -> enable auto-merge)
 on:
   push:
     branches:
-      - 'main'
       - 'feature/**'
   pull_request:
     branches:
@@ -75,4 +74,5 @@ jobs:
             });
             console.log(`Created PR: ${pr.data.html_url}`);
             return pr.data.number;
+
     
