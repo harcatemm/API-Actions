@@ -1,14 +1,21 @@
-﻿# Build stage
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# copia sln y csproj (ajusta rutas)
-# COPY ["Solution.sln", "./"]
-COPY ["Catalog.csproj", "./"]
-RUN dotnet restore "Catalog.csproj"
+# Copiar todos los .csproj para que las dependencias estén disponibles
+COPY Catalog/Catalog.csproj Catalog/
+COPY Domain/Domain.csproj Domain/
+COPY APP/APP.csproj Application/
+COPY Infraestructure/Infraestructure.csproj Infrastructure/
 
+# Restaurar
+RUN dotnet restore Catalog/Catalog.csproj
+
+# Copiar todo el código
 COPY . .
-WORKDIR /src
+
+# Compilar Catalog
+WORKDIR /src/Catalog
 RUN dotnet publish -c Release -o /app/publish
 
 # Runtime
