@@ -25,6 +25,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./Catalog/Dockerfile
+          context: ./Catalog
+          file: ./Catalog/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/miapp:latest
