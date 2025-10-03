@@ -6,7 +6,7 @@ WORKDIR /src
 COPY ["Solution.sln", "./"]
 COPY ["Catalog/Catalog.csproj", "Catalog/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
-COPY ["Infraestructure/Infraestructure.csproj", "Infraestructure/"]   # <- usa el nombre real
+COPY ["Infraestructure/Infraestructure.csproj", "Infraestructure/"]
 COPY ["APP/APP.csproj", "APP/"]               
 # añade más COPY para otros proyectos si existen
 
