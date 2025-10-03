@@ -28,4 +28,6 @@ jobs:
           context: .
           file: ./Catalog/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/miapp:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/miapp:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/miapp:latest
