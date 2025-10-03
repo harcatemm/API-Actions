@@ -5,8 +5,8 @@ WORKDIR /src
 # Copiar todos los .csproj para que las dependencias estén disponibles
 COPY Catalog/Catalog.csproj Catalog/
 COPY Domain/Domain.csproj Domain/
-COPY APP/APP.csproj Application/
-COPY Infraestructure/Infraestructure.csproj Infrastructure/
+COPY APP/APP.csproj APP/
+COPY Infraestructure/Infraestructure.csproj Infraestructure/
 
 # Restaurar
 RUN dotnet restore Catalog/Catalog.csproj
