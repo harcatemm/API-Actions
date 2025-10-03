@@ -26,7 +26,7 @@ namespace Catalog.Extensions
                 {
                     Title = "My API",
                     Version = description.ApiVersion.ToString(),
-                    Description = "API con versionamiento dinámico"
+                    Description = "API con versionamiento dinámico..."
                 });
 
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));

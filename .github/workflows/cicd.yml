@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+      
+  release:
+    types: [published]
 
 jobs:
   build-and-push:
@@ -29,5 +32,5 @@ jobs:
           file: ./Catalog/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/miapp:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/miapp:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/miapp:${{ github.ref_name }}
