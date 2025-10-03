@@ -1,20 +1,22 @@
-# Build stage
+# Catalog/Dockerfile — opción cacheada / optimizada
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copiar todos los .csproj para que las dependencias estén disponibles
-COPY Catalog/Catalog.csproj Catalog/
-COPY Domain/Domain.csproj Domain/
-COPY APP/APP.csproj APP/
-COPY Infraestructure/Infraestructure.csproj Infraestructure/
+# Copiar solo los csproj (ajusta nombres y rutas EXACTAS según tu repo)
+COPY ["Solution.sln", "./"]
+COPY ["Catalog/Catalog.csproj", "Catalog/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Infraestructure/Infraestructure.csproj", "Infraestructure/"]   # <- usa el nombre real
+COPY ["APP/APP.csproj", "APP/"]               
+# añade más COPY para otros proyectos si existen
 
-# Restaurar
-RUN dotnet restore Catalog/Catalog.csproj
+# Restaurar (cacheable)
+RUN dotnet restore "Catalog/Catalog.csproj"
 
-# Copiar todo el código
+# Copiar el resto del código
 COPY . .
 
-# Compilar Catalog
+# Publicar
 WORKDIR /src/Catalog
 RUN dotnet publish -c Release -o /app/publish
 
