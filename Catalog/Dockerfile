@@ -3,12 +3,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # copia sln y csproj (ajusta rutas)
-COPY ["Solution.sln", "./"]
-COPY ["Catalog/Catalog.csproj", "Catalog/"]
-RUN dotnet restore "Catalog/Catalog.csproj"
+# COPY ["Solution.sln", "./"]
+COPY ["Catalog.csproj", "./"]
+RUN dotnet restore "Catalog.csproj"
 
 COPY . .
-WORKDIR /src/Catalog
+WORKDIR /src
 RUN dotnet publish -c Release -o /app/publish
 
 # Runtime
