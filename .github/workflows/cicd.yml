@@ -34,3 +34,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/miapp:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/miapp:${{ github.ref_name }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/miapp:${{ github.sha }}
