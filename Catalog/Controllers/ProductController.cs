@@ -3,6 +3,7 @@ using APP.DTO;
 using APP.Interfaces;
 using Catalog.Entity;
 using Asp.Versioning;
+using System.Text.Json;
 
 namespace Catalog.Controllers
 {
@@ -14,10 +15,12 @@ namespace Catalog.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class ProductController : ControllerBase
     {
+        private readonly ILogger<ProductController> _logger;
         private readonly IProductService productService;
-        public ProductController(IProductService product)
+        public ProductController(IProductService product, ILogger<ProductController> logger)
         {
             this.productService = product;
+            this._logger = logger;
         }
 
         /// <summary>
@@ -27,6 +30,9 @@ namespace Catalog.Controllers
         [HttpGet("", Name = "GetAllProducts")]
         public async Task<ActionResult<ApiResponse<IEnumerable<ProductDTO?>>>> Get()
         {
+            _logger.LogInformation("{Controller}/Get method starts on {Time}",
+                nameof(ProductController),
+                DateTime.UtcNow);
             var products = await productService.GetAllProductsAsync();
             if (products is null || !products.Any())
                 return NotFound(new ApiResponse<IEnumerable<ProductDTO?>?>
@@ -35,13 +41,17 @@ namespace Catalog.Controllers
                     Message = "No products found",
                     Data = null
                 });
-            else
-                return Ok(new ApiResponse<IEnumerable<ProductDTO?>?>
-                {
-                    Success = true,
-                    Message = $"{products.Count()} products found",
-                    Data = products
-                });
+
+            _logger.LogInformation("{Controller}/Get method finishes on {Time}",
+                nameof(ProductController),
+                DateTime.UtcNow);
+
+            return Ok(new ApiResponse<IEnumerable<ProductDTO?>?>
+            {
+                Success = true,
+                Message = $"{products.Count()} products found",
+                Data = products
+            });
         }
 
         /// <summary>
@@ -52,6 +62,11 @@ namespace Catalog.Controllers
         [HttpPost("", Name = "AddProduct")]
         public async Task<ActionResult<ApiResponse<bool>>> Add([FromBody] ProductDTO? product)
         {
+            _logger.LogInformation("{Controller}/Add method starts on {Time}, with product data => {data}",
+                nameof(ProductController),
+                DateTime.UtcNow,
+                JsonSerializer.Serialize(product));
+
             if (product is null)
                 return BadRequest(new ApiResponse<bool>
                 {
@@ -68,13 +83,18 @@ namespace Catalog.Controllers
                     Message = "Product added successfully",
                     Data = true
                 });
-            else
-                return Conflict(new ApiResponse<bool>
-                {
-                    Success = false,
-                    Message = "Product cannot be added",
-                    Data = false
-                });
+
+
+            _logger.LogInformation("{Controller}/Add method finishes on {Time}",
+                nameof(ProductController),
+                DateTime.UtcNow);
+
+            return Conflict(new ApiResponse<bool>
+            {
+                Success = false,
+                Message = "Product cannot be added",
+                Data = false
+            });
         }
 
         /// <summary>

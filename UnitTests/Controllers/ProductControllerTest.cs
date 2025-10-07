@@ -11,6 +11,8 @@ using Catalog.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Catalog.Entity;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Microsoft.Extensions.Logging;
 
 
 namespace UnitTests.Controllers
@@ -19,10 +21,13 @@ namespace UnitTests.Controllers
     {
         private readonly Mock<IProductService> _mockProductService;
         private readonly ProductController _controller;
+        private readonly Mock<ILogger<ProductController>> logger;
+
         public ProductControllerTest() 
         {
             _mockProductService = new Mock<IProductService>();
-            _controller = new ProductController(_mockProductService.Object);
+             logger = new Mock<ILogger<ProductController>>();
+            _controller = new ProductController(_mockProductService.Object, logger.Object);
         }
 
         [Fact]
