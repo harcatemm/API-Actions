@@ -4,9 +4,19 @@ using Infraestructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Serilog;
+using Prometheus;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -52,6 +62,9 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = "swagger";        
 });
 
+app.UseRouting(); //para prometheus
+app.UseHttpMetrics();
+app.MapMetrics();
 
 app.UseHttpsRedirection();
 
