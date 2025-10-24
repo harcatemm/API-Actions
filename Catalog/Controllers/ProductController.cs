@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using APP.DTO;
+﻿using APP.DTO;
+using APP.Features.Products.Commands;
+using APP.Features.Products.Queries;
 using APP.Interfaces;
-using Catalog.Entity;
 using Asp.Versioning;
+using Catalog.Entity;
+using Domain.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+
 
 namespace Catalog.Controllers
 {
@@ -17,10 +22,12 @@ namespace Catalog.Controllers
     {
         private readonly ILogger<ProductController> _logger;
         private readonly IProductService productService;
-        public ProductController(IProductService product, ILogger<ProductController> logger)
+        private readonly IMediator _mediator;
+        public ProductController(IProductService product, ILogger<ProductController> logger, IMediator mediator)
         {
             this.productService = product;
             this._logger = logger;
+            this._mediator = mediator;
         }
 
         /// <summary>
@@ -33,7 +40,9 @@ namespace Catalog.Controllers
             _logger.LogInformation("{Controller}/Get method starts on {Time}",
                 nameof(ProductController),
                 DateTime.UtcNow);
-            var products = await productService.GetAllProductsAsync();
+
+            var products = await _mediator.Send(new GetAllProductsQuery());
+            //var products = await productService.GetAllProductsAsync();
             if (products is null || !products.Any())
                 return NotFound(new ApiResponse<IEnumerable<ProductDTO?>?>
                 {
@@ -60,7 +69,7 @@ namespace Catalog.Controllers
         /// <param name="product"></param>
         /// <returns></returns>
         [HttpPost("", Name = "AddProduct")]
-        public async Task<ActionResult<ApiResponse<bool>>> Add([FromBody] ProductDTO? product)
+        public async Task<ActionResult<ApiResponse<bool>>> Add([FromBody] CreateProductCommand? product)
         {
             _logger.LogInformation("{Controller}/Add method starts on {Time}, with product data => {data}",
                 nameof(ProductController),
@@ -75,7 +84,8 @@ namespace Catalog.Controllers
                     Data = false
                 });
 
-            var result = await productService.AddProductAsync(product);
+            var result = await _mediator.Send(product);
+            //var result = await productService.AddProductAsync(product);
             if (result)
                 return Ok(new ApiResponse<bool>
                 {
@@ -113,7 +123,9 @@ namespace Catalog.Controllers
                     Data = false
                 });
 
-            var result = await productService.DeleteProductByIdAsync(id);
+            var result = await _mediator.Send(new DeleteProductCommand(id));            
+            //var result = await productService.DeleteProductByIdAsync(id);
+            
             if (result)
                 return Ok(new ApiResponse<bool>
                 {
@@ -137,7 +149,7 @@ namespace Catalog.Controllers
         /// <param name="product"></param>
         /// <returns></returns>
         [HttpPut("{id:int}", Name = "UpdateProductById")]
-        public async Task<ActionResult<ApiResponse<bool>>> Update(int id, [FromBody] ProductDTO product)
+        public async Task<ActionResult<ApiResponse<bool>>> Update(int id, [FromBody] UpdateProductCommand product)
         {
             if (product is null || id != product.Id)
                 return BadRequest(new ApiResponse<bool>
@@ -147,7 +159,8 @@ namespace Catalog.Controllers
                     Data = false
                 });
 
-            var result = await productService.UpdateProductByIdAsync(product);
+            var result = await _mediator.Send(product);
+            //var result = await productService.UpdateProductByIdAsync(product);
             if (result)
                 return Ok(new ApiResponse<bool>
                 {
@@ -180,8 +193,10 @@ namespace Catalog.Controllers
                     Data = null
                 });
 
-            var product = await productService.GetProductByIdAsync(id);
-            if(product is not null)
+            var product = await _mediator.Send(new GetProductByIdQuery(id));
+            //var product = await productService.GetProductByIdAsync(id);
+
+            if (product is not null)
                 return Ok(new ApiResponse<ProductDTO?>
                 {
                     Success = true,
@@ -214,7 +229,9 @@ namespace Catalog.Controllers
                     Data = null
                 });
 
-            var product = await productService.GetProductByIdWithCategoryDTO(id);
+            var product = await _mediator.Send(new GetProductWithCategoryQuery(id));
+            //var product = await productService.GetProductByIdWithCategoryDTO(id);
+
             if (product is not null)
                 return Ok(new ApiResponse<ProductWithCategoryDTO?>
                 {
