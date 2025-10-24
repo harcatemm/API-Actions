@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
-using FluentAssertions;
-using APP.Interfaces;
-using APP.DTO;
-using Catalog.Controllers;
-using Microsoft.AspNetCore.Mvc;
+﻿using Catalog.Controllers;
 using Catalog.Entity;
+using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Microsoft.Extensions.Logging;
+using Moq;
+using APP.Features.Products.Queries;
+using APP.Features.Products.Commands;
+using APP.DTO;
+using APP.Interfaces;
 
 
 namespace UnitTests.Controllers
@@ -22,12 +19,14 @@ namespace UnitTests.Controllers
         private readonly Mock<IProductService> _mockProductService;
         private readonly ProductController _controller;
         private readonly Mock<ILogger<ProductController>> logger;
+        private readonly Mock<IMediator> _mockMediator;
 
         public ProductControllerTest() 
         {
             _mockProductService = new Mock<IProductService>();
              logger = new Mock<ILogger<ProductController>>();
-            _controller = new ProductController(_mockProductService.Object, logger.Object);
+            _mockMediator = new Mock<IMediator>();
+            _controller = new ProductController(_mockProductService.Object, logger.Object, _mockMediator.Object);
         }
 
         [Fact]
@@ -47,7 +46,10 @@ namespace UnitTests.Controllers
                 Data = products
             };
 
-            _mockProductService.Setup(s => s.GetAllProductsAsync())
+            //_mockProductService.Setup(s => s.GetAllProductsAsync())
+                //.ReturnsAsync(products);
+
+            _mockMediator.Setup(m => m.Send(new GetAllProductsQuery(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(products);
 
             // Act
@@ -66,8 +68,11 @@ namespace UnitTests.Controllers
         public async Task GetAllProducts_ShouldReturnNotFound_WhenNoProducts()
         {
             // Arrange
-            _mockProductService.Setup(s => s.GetAllProductsAsync())
-                .ReturnsAsync(Enumerable.Empty<ProductDTO>);
+            //_mockProductService.Setup(s => s.GetAllProductsAsync())
+              //  .ReturnsAsync(Enumerable.Empty<ProductDTO>);
+
+            _mockMediator.Setup(m => m.Send(new GetAllProductsQuery(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Enumerable.Empty<ProductDTO>());
 
             var expectedResponse = new ApiResponse<IEnumerable<ProductDTO?>>
             {
@@ -92,7 +97,11 @@ namespace UnitTests.Controllers
         {
             //arrange 
             int DeleteProductId = 1;
-            _mockProductService.Setup(s => s.DeleteProductByIdAsync(DeleteProductId))
+
+            //_mockProductService.Setup(s => s.DeleteProductByIdAsync(DeleteProductId))
+              //  .ReturnsAsync(true);
+
+            _mockMediator.Setup(m => m.Send(new DeleteProductCommand(DeleteProductId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             var apiResponse = new ApiResponse<bool>
@@ -118,7 +127,11 @@ namespace UnitTests.Controllers
         {
             //Arrange
             int notExistProductId = 99;
-            _mockProductService.Setup(s => s.DeleteProductByIdAsync(notExistProductId))
+
+            //_mockProductService.Setup(s => s.DeleteProductByIdAsync(notExistProductId))
+              //  .ReturnsAsync(false);
+
+            _mockMediator.Setup(m => m.Send(new DeleteProductCommand(notExistProductId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             var apiResponse = new ApiResponse<bool>
@@ -144,15 +157,15 @@ namespace UnitTests.Controllers
         public async Task AddProduct_ShouldReturnOk_WhenProductIsValid()
         {
             // Arrange
-            var product = new ProductDTO
-            {
-                Name = "CNN",
-                Description = "Information",
-                Price = 10.0m,
-                CategoryId = 1
-            };
+            var product = new CreateProductCommand
+            (
+                Name: "CNN",
+                Description: "Information",
+                Price: 10.0m,
+                CategoryId: 1
+            );
 
-            _mockProductService.Setup(s => s.AddProductAsync(product))
+            _mockMediator.Setup(s => s.Send(product, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             //Act
@@ -170,9 +183,9 @@ namespace UnitTests.Controllers
         public async Task AddProduct_ShouldReturnFalse_WhenProductIsInvalid()
         {
             //Arrenge
-            ProductDTO? product = null;
+            CreateProductCommand? product = null!;
 
-            _mockProductService.Setup(s => s.AddProductAsync(product))
+            _mockMediator.Setup(s => s.Send(product, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             //Act
@@ -192,16 +205,16 @@ namespace UnitTests.Controllers
         {
             // Arrange
             var updateProductId = 1;
-            var product = new ProductDTO
-            {
-                Id = 1,
-                Name = "Updated Product",
-                Description = "Updated Description",
-                Price = 15.0m,
-                CategoryId = 1
-            };
+            var product = new UpdateProductCommand
+            (
+                Id: 1,
+                Name: "Updated Product",
+                Description: "Updated Description",
+                Price: 15.0m,
+                CategoryId: 1
+            );
 
-            _mockProductService.Setup(s => s.UpdateProductByIdAsync(product))
+            _mockMediator.Setup(s => s.Send(product, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             //Act 
@@ -229,7 +242,10 @@ namespace UnitTests.Controllers
                 CategoryId = 1
             };
 
-            _mockProductService.Setup(s => s.GetProductByIdAsync(productId))
+            //_mockProductService.Setup(s => s.GetProductByIdAsync(productId))
+              //  .ReturnsAsync(product);
+
+            _mockMediator.Setup(m => m.Send(new GetProductByIdQuery(productId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(product);
 
             //Act
@@ -244,9 +260,6 @@ namespace UnitTests.Controllers
             var productResult = response.Data.Should().BeOfType<ProductDTO>().Which;
             productResult.Id.Should().Be(productId);
             productResult.Name.Should().Be(product.Name);
-
-
-
         }
 
         [Fact]
@@ -268,7 +281,10 @@ namespace UnitTests.Controllers
                 }
             };
 
-            _mockProductService.Setup(s => s.GetProductByIdWithCategoryDTO(productId))
+            //_mockProductService.Setup(s => s.GetProductByIdWithCategoryDTO(productId))
+                //.ReturnsAsync(product);
+
+            _mockMediator.Setup(m => m.Send(new GetProductWithCategoryQuery(productId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(product);
 
             //Act 
