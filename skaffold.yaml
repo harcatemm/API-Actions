@@ -1,0 +1,28 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: catalog-app
+
+build:
+  artifacts:
+    - image: catalog-app
+      context: .
+      docker:
+        dockerfile: Catalog/Dockerfile
+  local:
+    push: false
+
+manifests:
+  rawYaml:
+    - ./catalog-deployment.yaml
+    - ./catalog-service.yaml
+
+deploy:
+  kubectl:
+    defaultNamespace: catalog
+
+portForward:
+  - resourceType: service
+    resourceName: catalog-service
+    port: 80
+    localPort: 8080

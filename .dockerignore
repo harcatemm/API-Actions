@@ -1,0 +1,19 @@
+# Ignorar archivos temporales y de VS
+.vs/
+.idea/
+bin/
+obj/
+.vscode/
+*.user
+*.suo
+
+# Ignorar repos locales y config
+.git/
+.gitignore
+Dockerfile*
+docker-compose*
+
+# Ignorar archivos de build
+*.cache
+*.log
+*.vsidx

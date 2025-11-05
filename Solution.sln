@@ -27,6 +27,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{B83473A2-4DC6-46C9-A236-63B3C1ACE264}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{D107F4C8-89CC-BEA8-D3D7-CA6B7733353D}"
+	ProjectSection(SolutionItems) = preProject
+		catalog-deployment.yaml = catalog-deployment.yaml
+		catalog-service.yaml = catalog-service.yaml
+		docker-compose.yml = docker-compose.yml
+		mssql-deployment.yaml = mssql-deployment.yaml
+		mssql-nodeport.yaml = mssql-nodeport.yaml
+		README.md = README.md
+		skaffold.yaml = skaffold.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

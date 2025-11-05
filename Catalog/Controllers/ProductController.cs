@@ -247,5 +247,11 @@ namespace Catalog.Controllers
                     Data = null
                 });
         }
+
+        [HttpGet("GetDatatime", Name = "GetDatatime")]
+        public ActionResult<string> GetDatatime(string something)
+        {
+            return Ok(DateTime.UtcNow.ToLongDateString() + " - " + something);
+        }
     }
 }
